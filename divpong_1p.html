@@ -1,0 +1,182 @@
+<html>
+
+<body onload="gameLoop()" onkeydown="keyDown(event)" onkeyup="keyUp(event)" bgcolor='gray'>
+
+	<!-- The Level -->
+	<div id="field" style="width:750px; height:500px; background:black; margin:auto; position:relative;">
+
+		<!-- The Right Paddle -->
+		<div id="Righty" style="height:50px; width:10px; background-color:lime; position:absolute; right:10px; top:225px;"></div>
+
+		<div id="sign" style="position:absolute; height:50%; width:50%; margin:auto; color:lime;">
+		0</div>
+
+		<!-- The Ball -->
+		<div id="ball" style="height:10px; width:10px; background-color:lime; position:absolute; left:370px; top:245px;"></div>
+	</div>
+
+<script>
+
+// movement vars
+// right paddle
+var pos_R = 225;
+var speed_R = 0;
+var maxSpeed_R = 5;
+// ball
+var xpos_B = ((parseInt(document.getElementById("field").style.width))/2)-5;
+var ypos_B = ((parseInt(document.getElementById("field").style.height))/2)-5;
+var xspeed_B = 3;
+var yspeed_B = 1;
+var ballRight = true;
+var ballDown = Math.round(Math.random());
+
+// boundary
+var minx = 0;
+var miny = 0;
+var maxx = parseInt(document.getElementById("field").style.width);
+var maxy = parseInt(document.getElementById("field").style.height);
+
+// controller vars
+// right paddle
+var upPressed = 0;
+var downPressed = 0;
+
+// widths
+var padwid = 50;
+var balwid = 10;
+
+var bounds = 20;
+var score_R = 0;
+
+
+function gameLoop() {
+	moveBall();
+	moveRighty();
+	setTimeout("gameLoop()",10);
+}
+
+function moveRighty() {
+	pos_R = Math.min(Math.max(pos_R + speed_R,miny),(maxy-padwid));
+	document.getElementById('Righty').style.top = pos_R;
+	if (upPressed == 1) {
+		speed_R = Math.max(speed_R - 1,-1*maxSpeed_R);
+	}
+	if (downPressed == 1) {
+		speed_R = Math.min(speed_R + 1,1*maxSpeed_R);
+	}
+	if (upPressed == 0 && downPressed == 0) {
+		speed_R = 0;
+	}
+	return;
+}
+
+function keyDown(e) {
+	if (e.keyCode == 38) {
+		upPressed = 1;
+	}
+	if (e.keyCode == 40) {
+		downPressed = 1;
+	}
+	if (e.keyCode == 87) {
+		wPressed = 1;
+	}
+	if (e.keyCode == 83) {
+		sPressed = 1;
+	}
+}
+
+function keyUp(e) {
+	if (e.keyCode == 38) {
+		upPressed = 0;
+	}
+	if (e.keyCode == 40) {
+		downPressed = 0;
+	}
+	if (e.keyCode == 87) {
+		wPressed = 0;
+	}
+	if (e.keyCode == 83) {
+		sPressed = 0;
+	}
+}
+
+function moveBall() {
+	document.getElementById("ball").style.left = xpos_B;
+	document.getElementById("ball").style.top = ypos_B;
+
+	// x axis
+	if (ballRight == true) {
+		xpos_B += Math.round(xspeed_B);
+		if (ypos_B + balwid >= pos_R && ypos_B <= pos_R + padwid && xpos_B >= maxx - bounds - balwid ) {
+			xpos_B = maxx-20-balwid;
+			ballRight = false;
+			ballBopper(pos_R);
+		} else if (xpos_B >= maxx-balwid) {
+			ballBoom(false);
+			ballRight = false;
+		}
+
+	} else {
+		xpos_B -= Math.round(xspeed_B);
+		if (xpos_B <= minx) {
+			xpos_B = minx;
+			ballRight = true;
+			xspeed_B *= 1.1;
+		}
+	}
+	
+	// y axis
+	if (ballDown == true) {
+		ypos_B += Math.round(yspeed_B);
+		if (ypos_B >= maxy-balwid) {
+			ypos_B = maxy-balwid;
+			ballDown = false;
+		}
+	} else {
+		ypos_B -= Math.round(yspeed_B);
+		if (ypos_B <= miny) {
+			ypos_B = miny;
+			ballDown = true;
+		}
+	}
+
+	return;
+}
+
+function ballBopper(paddlepos) {
+	var ballIndex = ypos_B + (balwid/2);
+	if (ballIndex <= paddlepos+(padwid/10)) {
+		ballDown = false;
+		yspeed_B = xspeed_B;
+	} else if (ballIndex < paddlepos+(padwid/3) && ballIndex > paddlepos+(padwid/10)) {
+		ballDown = false;
+		yspeed_B = xspeed_B/2;
+	} else if (ballIndex < paddlepos+(padwid/2) && ballIndex > paddlepos+(padwid/3)) {
+		ballDown = false;
+		yspeed_B = xspeed_B/4;
+	} else if (ballIndex < paddlepos+((padwid/3)*2) && ballIndex > paddlepos+(padwid/2)) {
+		ballDown = true;
+		yspeed_B = xspeed_B/4;
+	} else if (ballIndex < paddlepos+((padwid/10)*9) && ballIndex > paddlepos+((padwid/3)*2)) {
+		ballDown = true;
+		yspeed_B = xspeed_B/2;
+	} else {
+		ballDown = true;
+		yspeed_B = xspeed_B;
+	}
+	xspeed_B *= 1.1;
+	score_R += 1;
+	document.getElementById("sign").innerHTML = score_R;
+	return;
+}
+
+function ballBoom(rightScores) {
+	xspeed_B = 0;
+	yspeed_B = 0;
+}
+
+</script>
+
+</body>
+
+</html>
